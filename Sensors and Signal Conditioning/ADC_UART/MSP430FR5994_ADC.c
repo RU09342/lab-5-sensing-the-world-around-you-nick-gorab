@@ -54,6 +54,7 @@ void uartInit(void) {
              |   UCBRF_13   // Modulation
              |   UCOS16;    // Modulation
     UCA0CTL1 &= ~UCSWRST;   // Initializes the state machine
+    UCA0IE   |=  UCRXIE;    // Enables USCI_A0 RX Interrupt
 }
 
 

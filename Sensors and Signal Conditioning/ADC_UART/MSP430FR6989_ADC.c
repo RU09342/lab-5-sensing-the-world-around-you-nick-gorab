@@ -31,11 +31,24 @@
  *                      *
 \************************/
 
-int TX_Data = 0;    // 16-bit integer
-char MSB    = 0;    // 8-bit integer
-char LSB    = 0;    // 8-bit integer
+unsigned int TX_Data = 0;    // 16-bit integer
+         char MSB    = 0;    // 8-bit integer
+         char LSB    = 0;    // 8-bit integer
 
 
+
+void clkInit(void){
+  CSCTL0_H = CSKEY >> 8;
+  CSCTL1   = DCOFSEL_3
+           | DCORSEL;
+  CSCTL2   = SELA__VLOCLK
+           | SELS__DCOCLK
+           | SELM__DCOCLK;
+  CSCTL3   = DIVA__1
+           | DIVS__1
+           | DIVM__1;
+  CSCTL0_H = 0;
+}
 
 /*************************\
  *                       *
@@ -44,16 +57,17 @@ char LSB    = 0;    // 8-bit integer
 \*************************/
 
 void uartInit(void) {
-    P3SEL    |=  BIT3       // UART TX
-             |   BIT4;      // UART RX
-    UCA0CTL1 |=  UCSWRST    // Resets state machine
-             |   UCSSEL_2;  // SMCLK
-    UCA0BR0   =  6;         // 9600 Baud Rate
-    UCA0BR1   =  0;         // 9600 Baud Rate
-    UCA0MCTL |=  UCBRS_0    // Modulation
-             |   UCBRF_13   // Modulation
-             |   UCOS16;    // Modulation
-    UCA0CTL1 &= ~UCSWRST;   // Initializes the state machine
+    P2SEL0    |=  BIT0       // UART TX
+              |   BIT1;      // UART RX
+    UCA0CTL1  |=  UCSWRST    // Resets state machine
+              |   UCSSEL_2;  // SMCLK
+    UCA0BR0    =  52;        // 9600 Baud Rate
+    UCA0BR1    =  0x00;         // 9600 Baud Rate
+    UCA0MCTLW  =  0x4900    // Modulation
+              |   UCBRF_1   // Modulation
+              |   UCOS16;    // Modulation
+    UCA0CTLW0 &= ~UCSWRST;   // Initializes the state machine
+    UCA0IE    |=  UCRXIE;    // Enables USCI_A0 RX Interrupt
 }
 
 
@@ -65,7 +79,8 @@ void uartInit(void) {
 \************************/
 
 void adcInit(void){
-    P6SEL     |= BIT0;          // ADC readings taken on A0 (Pin 6.0)
+    P8SEL0    |= BIT7;          // ADC readings taken on A1 (Pin 1.1)
+    ADC12MCTL0  = ADC12INCH_4;
     ADC12CTL0  = ADC12ON        // Turns on ADC12
                + ADC12SHT0_8    // Sets sampling time
                + ADC12MSC;      // Sets up multiple sample conversion
@@ -85,7 +100,7 @@ void adcInit(void){
 
 void timerInit(void){
     TA0CCTL0 = CCIE;        // Emables Timer_A interrupts
-    TA0CTL   = TASSEL_1     // Uses SMCLK
+    TA0CTL   = TASSEL_2     // Uses SMCLK
              + MC_1;        // Counts in Up-Mode
     TA0CCR0  = 32700;       // Samples ~ every second
 }
