@@ -57,18 +57,17 @@ void clkInit(void){
 \*************************/
 
 void uartInit(void) {
-    P2SEL0    |=  BIT0       // UART TX
-              |   BIT1;      // UART RX
-    UCA0CTL1  |=  UCSWRST    // Resets state machine
-              |   UCSSEL_2;  // SMCLK
-    UCA0BR0    =  52;        // 9600 Baud Rate
-    UCA0BR1    =  0x00;         // 9600 Baud Rate
-    UCA0MCTLW  =  0x4900    // Modulation
-              |   UCBRF_1   // Modulation
-              |   UCOS16;    // Modulation
-    UCA0CTLW0 &= ~UCSWRST;   // Initializes the state machine
-    UCA0IE    |=  UCRXIE;    // Enables USCI_A0 RX Interrupt
+    P2SEL0 |= BIT0;                         // UART TX
+    UCA0CTLW0 |= UCSWRST;                   // State machine reset
+    UCA0CTLW0 |= UCSSEL1;                   // Uses SMCLK as source
+    UCA0BR0    = 52;                         // Modulation
+    UCA0MCTLW  = UCBRF_1
+              | UCOS16
+              | 0x4900;
+    UCA0BR1    = 0x00;                         // Modulation
+    UCA0CTLW0 &= ~UCSWRST;                  // Starts state machine
 }
+
 
 
 
@@ -131,6 +130,7 @@ void formatAndSend(int value){
 
 void main(void){
     WDTCTL = WDTPW+WDTHOLD;             // Stops Watchdog Timer
+    clkInit();
     uartInit();                         // Initializes UART
     adcInit();                          // Initializes ADC
     timerInit();                        // Initializes TIMER_A
