@@ -38,9 +38,9 @@ unsigned int TX_Data = 0;    // 16-bit integer
 
 
 void clkInit(void){
-  DCOCTL = 0;                               // Select lowest DCOx and MODx settings
-  BCSCTL1 = CALBC1_1MHZ;                    // Set DCO
-  DCOCTL = CALDCO_1MHZ;
+  DCOCTL = 0;             // Select lowest DCOx and MODx settings
+  BCSCTL1 = CALBC1_1MHZ;  // Set DCO at 1 MHz
+  DCOCTL = CALDCO_1MHZ;   // Sets DCO at 1 MHz
 }
 
 /*************************\
@@ -50,13 +50,13 @@ void clkInit(void){
 \*************************/
 
 void uartInit(void) {
-    P1SEL    |= BIT1 + BIT2 + BIT5;           // P1.1 = RXD, P1.2=TXD
-    P1SEL2   |= BIT1 + BIT2;                  // P1.1 = RXD, P1.2=TXD
-    UCA0CTL1 |= UCSSEL_2;                     // SMCLK
-    UCA0BR0   = 104;                          // 1MHz 9600
-    UCA0BR1   = 0;                            // 1MHz 9600
-    UCA0MCTL  = UCBRS0;                       // Modulation UCBRSx = 1
-    UCA0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
+    P1SEL    |= BIT1 + BIT2 + BIT5; // P1.1 = RXD, P1.2=TXD
+    P1SEL2   |= BIT1 + BIT2;        // P1.1 = RXD, P1.2=TXD
+    UCA0CTL1 |= UCSSEL_2;           // SMCLK
+    UCA0BR0   = 104;                // 1MHz 9600
+    UCA0BR1   = 0;                  // 1MHz 9600
+    UCA0MCTL  = UCBRS0;             // Modulation UCBRSx = 1
+    UCA0CTL1 &= ~UCSWRST;           // **Initialize USCI state machine**
 }
 
 

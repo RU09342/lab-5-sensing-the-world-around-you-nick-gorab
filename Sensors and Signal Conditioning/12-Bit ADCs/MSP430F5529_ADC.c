@@ -1,8 +1,8 @@
 /*
  *       MSP430F5529_ADC.c
  *
- *   Created on:  October 31, 2017
- *  Last Edited:  October 31, 2017
+ *   Created on:  November 7, 2017
+ *  Last Edited:  November 7, 2017
  *       Author:  Nick Gorab
  *        Board:  5529
  */

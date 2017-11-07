@@ -1,10 +1,10 @@
 /*
  *       MSP430F5529_ADC.c
  *
- *   Created on:  October 31, 2017
- *  Last Edited:  October 31, 2017
+ *   Created on:  November 7, 2017
+ *  Last Edited:  November 7, 2017
  *       Author:  Nick Gorab
- *        Board:  6989
+ *        Board:  5994
  */
 
 
@@ -38,16 +38,16 @@ unsigned int TX_Data = 0;    // 16-bit integer
 
 
 void clkInit(void){
-  CSCTL0_H = CSKEY_H;
-  CSCTL1   = DCOFSEL_3
-           | DCORSEL;
-  CSCTL2   = SELA__VLOCLK
-           | SELS__DCOCLK
-           | SELM__DCOCLK;
-  CSCTL3   = DIVA__1
-           | DIVS__1
-           | DIVM__1;
-  CSCTL0_H = 0;
+  CSCTL0_H = CSKEY_H;       // Unlocks clock registers for writing
+  CSCTL1   = DCOFSEL_3      // Sets DCO at 8MHz
+           | DCORSEL;       // Sets DCO at 8MHz
+  CSCTL2   = SELA__VLOCLK   // Selects ACLK source of VLOCLK
+           | SELS__DCOCLK   // SMCLK source as DCOCLK
+           | SELM__DCOCLK;  // MCLK source as DCOCLK
+  CSCTL3   = DIVA__1        // ACLK source divider of 2
+           | DIVS__1        // SMCLK source divider of 2
+           | DIVM__1;       // MCLK source divider of 2
+  CSCTL0_H = 0;             // Locks clock registers 
 }
 
 /*************************\
