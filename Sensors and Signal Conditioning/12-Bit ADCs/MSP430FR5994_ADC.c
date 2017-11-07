@@ -57,14 +57,14 @@ void clkInit(void){
 \*************************/
 
 void uartInit(void) {
-    P6SEL0 |= BIT0;                         // UART TX
-    UCA3CTLW0 |= UCSWRST;                   // State machine reset
-    UCA3CTLW0 |= UCSSEL1;                   // Uses SMCLK as source
-    UCA3BRW    = 52;                        // Modulation
-    UCA3MCTLW  = UCBRF_1                    // Modulation
-              | UCOS16                      // Modulation
-              | 0x4900;                     // Modulation
-    UCA3CTLW0 &= ~UCSWRST;                  // Starts state machine
+    P6SEL0 |= BIT0;          // UART TX
+    UCA3CTLW0 |= UCSWRST;    // State machine reset
+    UCA3CTLW0 |= UCSSEL1;    // Uses SMCLK as source
+    UCA3BRW    = 52;         // Modulation
+    UCA3MCTLW  = UCBRF_1     // Modulation
+              | UCOS16       // Modulation
+              | 0x4900;      // Modulation
+    UCA3CTLW0 &= ~UCSWRST;   // Starts state machine
 }
 
 
@@ -77,9 +77,9 @@ void uartInit(void) {
 \************************/
 
 void adcInit(void){
-    P1SEL0    |= BIT2;          // ADC readings taken on A1 (Pin 1.1)
-    P1SEL1    |= BIT2;
-    ADC12MCTL0 = ADC12INCH_2;
+    P1SEL0    |= BIT2;          // ADC readings taken on A2 (Pin 1.2)
+    P1SEL1    |= BIT2;          // ADC readings taken on A2 (Pin 1.2)
+    ADC12MCTL0 = ADC12INCH_2;   // Selects input channel 2 (A2)
     ADC12CTL0  = ADC12ON        // Turns on ADC12
                + ADC12SHT0_8    // Sets sampling time
                + ADC12MSC;      // Sets up multiple sample conversion
@@ -98,12 +98,10 @@ void adcInit(void){
 \***************************/
 
 void timerInit(void){
-    TA0CCTL0 = CCIE;        // Emables Timer_A interrupts
-    TA0CTL   = TASSEL_1     // Uses SMCLK
-             + MC_1         // Counts in Up-Mode
-             + ID_0;        // Predivider of 8
-  //  TA0EX0   = TAIDEX_7;
-    TA0CCR0  = 6400;       // Samples ~ every second
+    TA0CCTL0 = CCIE;      // Emables Timer_A interrupts
+    TA0CTL   = TASSEL_1   // Uses SMCLK
+             + MC_1;      // Counts in Up-Mode
+    TA0CCR0  = 6400;      // Samples ~ every second
 }
 
 
@@ -132,7 +130,7 @@ void formatAndSend(int value){
 
 void main(void){
     WDTCTL = WDTPW+WDTHOLD;                 // Stops Watchdog Timer
-    PM5CTL0 &= ~LOCKLPM5;
+    PM5CTL0 &= ~LOCKLPM5;                   // Disables high-impedance mode
     clkInit();                              // Initializes DCO
     uartInit();                             // Initializes UART
     adcInit();                              // Initializes ADC

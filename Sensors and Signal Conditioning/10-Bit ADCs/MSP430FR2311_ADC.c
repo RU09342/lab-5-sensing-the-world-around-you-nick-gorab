@@ -39,11 +39,11 @@ unsigned int TX_Data = 0;    // 16-bit integer
 
 /************************\
  *                      *
- *  CLK Initialization  *
+ *  DCO Initialization  *
  *                      *
 \************************/
 
-void clkInit(void){
+void dcoInit(void){
     __bis_SR_register(SCG0);      // Disables FLL
       CSCTL3 |= SELREF__REFOCLK;  // Set REFO as FLL reference source
       CSCTL1  = DCOFTRIMEN_1      // DCO Trim
@@ -84,13 +84,17 @@ void uartInit(void) {
 \************************/
 
 void adcInit(void) {
-    P1SEL0 |= BIT1;               // // Sets up Pin 1.1 for ADC
-    P1SEL1 |= BIT1;               // Sets up Pin 1.1 for ADC
-    ADCCTL0 |= ADCSHT_2 | ADCON;  // ADCON, S&H=16 ADC clks
-    ADCCTL1 |= ADCSHP             // Sampling signal comes from sampling timer
-            | ADCCONSEQ_2;        // Sets ADC for continuous sampling
-    ADCCTL2 |= ADCRES;            // Sets resolution to 10 bits
-    ADCMCTL0 |= ADCINCH_1;        // Selects A1 as ADC input (Pin 1.1)
+    P1SEL0   |= BIT1;        // Sets up Pin 1.1 for ADC
+    P1SEL1   |= BIT1;        // Sets up Pin 1.1 for ADC
+    ADCCTL0  |= ADCSHT_2     // Sample time to 16 clock cycles
+             | ADCON         // Turns on ADC
+             | ADCMSC;       // Enables multiple conversions
+    ADCCTL1  |= ADCSHP       // Sampling signal comes from sampling timer
+             | ADCCONSEQ_2;  // Sets ADC for continuous sampling
+    ADCCTL2  |= ADCRES;      // Sets resolution to 10 bits
+    ADCMCTL0 |= ADCINCH_1;   // Selects A1 as ADC input (Pin 1.1)
+    ADCCTL0  |= ADCENC       // Enables conversions
+             |  ADCSC;       // Starts conversions
 }
 
 
@@ -103,10 +107,9 @@ void adcInit(void) {
 
 void timerInit(void) {
     TB0CCTL0 = CCIE;       // Emables Timer_B interrupts
-    TB0CTL   = TBSSEL_2    // Uses SMCLK
-             + MC_1        // Counts in Up-Mode
-             + ID_3;       // Predivider of 8
-    TB0CCR0  = 32000;      // Samples ~ every second
+    TB0CTL   = TBSSEL_1    // Uses SMCLK
+             + MC_1;       // Counts in Up-Mode
+    TB0CCR0  = 25600;      // Samples ~ every second
 }
 
 
@@ -134,15 +137,16 @@ void formatAndSend(int value) {
 \***********************/
 
 int main(void) {
-    WDTCTL = WDTPW | WDTHOLD;     // Stop Watchdog Timer
-    PM5CTL0 &= ~LOCKLPM5;         // Disables high impedance mode
-    clkInit();                    // Initializes 8MHz clock
-    adcInit();                    // Initializes ADC
-    uartInit();                   // Initializes UART
-    timerInit();                  // Initializes TIMER_B
-    __bis_SR_register(GIE);       // Enables interrupts
-    while(1){                     // While loop for sampling 
-      ADCCTL0 |= ADCENC | ADCSC;  // Sampling and conversion star
+    WDTCTL = WDTPW | WDTHOLD;               // Stop Watchdog Timer
+    PM5CTL0 &= ~LOCKLPM5;                   // Disables high impedance mode
+    dcoInit();                              // Initializes 8MHz clock
+    adcInit();                              // Initializes ADC
+    uartInit();                             // Initializes UART
+    timerInit();                            // Initializes TIMER_B
+
+    while(1){                               // Infinite loop for constant readings
+        formatAndSend(TX_Data);             // Formats it into bytes, and sends it.
+        __bis_SR_register(LPM0_bits + GIE); // Enter LPM0, Enable interrupts
     }
 }
 
@@ -157,5 +161,5 @@ int main(void) {
 #pragma vector = TIMER0_B0_VECTOR     // Timer_B interrupt
 __interrupt void Timer_B (void) {     // Timer_B interrupt vector function decleration
     TX_Data = ADCMEM0;                // Stores ADC memory
-    formatAndSend(TX_Data);           // Formats it into bytes, and sends it.
+    __bic_SR_register_on_exit(LPM0_bits); // Exits LPM0
 }

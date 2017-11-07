@@ -57,15 +57,15 @@ void clkInit(void){
 \*************************/
 
 void uartInit(void) {
-    P2SEL0 |= BIT0;                         // UART TX
-    UCA0CTLW0 |= UCSWRST;                   // State machine reset
-    UCA0CTLW0 |= UCSSEL1;                   // Uses SMCLK as source
-    UCA0BR0    = 52;                         // Modulation
-    UCA0MCTLW  = UCBRF_1
-              | UCOS16
-              | 0x4900;
-    UCA0BR1    = 0x00;                         // Modulation
-    UCA0CTLW0 &= ~UCSWRST;                  // Starts state machine
+    P2SEL0 |= BIT0;         // UART TX
+    UCA0CTLW0 |= UCSWRST;   // State machine reset
+    UCA0CTLW0 |= UCSSEL1;   // Uses SMCLK as source
+    UCA0BR0    = 52;        // Modulation
+    UCA0MCTLW  = UCBRF_1    // Modulation
+              | UCOS16      // Modulation
+              | 0x4900;     // Modulation
+    UCA0BR1    = 0x00;      // Modulation
+    UCA0CTLW0 &= ~UCSWRST;  // Starts state machine
 }
 
 
@@ -78,8 +78,8 @@ void uartInit(void) {
 \************************/
 
 void adcInit(void){
-    P8SEL0    |= BIT7;          // ADC readings taken on A1 (Pin 1.1)
-    ADC12MCTL0  = ADC12INCH_4;
+    P8SEL0    |= BIT7;          // ADC readings taken on A4 (Pin 1.1)
+    ADC12MCTL0  = ADC12INCH_4;  // ADC input channel 4 (A4)
     ADC12CTL0  = ADC12ON        // Turns on ADC12
                + ADC12SHT0_8    // Sets sampling time
                + ADC12MSC;      // Sets up multiple sample conversion
@@ -98,10 +98,10 @@ void adcInit(void){
 \***************************/
 
 void timerInit(void){
-    TA0CCTL0 = CCIE;        // Emables Timer_A interrupts
-    TA0CTL   = TASSEL_2     // Uses SMCLK
-             + MC_1;        // Counts in Up-Mode
-    TA0CCR0  = 32700;       // Samples ~ every second
+    TA0CCTL0 = CCIE;      // Emables Timer_A interrupts
+    TA0CTL   = TASSEL_1   // Uses SMCLK
+             + MC_1;      // Counts in Up-Mode
+    TA0CCR0  = 12800;     // Samples ~ every second
 }
 
 
@@ -129,12 +129,17 @@ void formatAndSend(int value){
 \***********************/
 
 void main(void){
-    WDTCTL = WDTPW+WDTHOLD;             // Stops Watchdog Timer
-    clkInit();
-    uartInit();                         // Initializes UART
-    adcInit();                          // Initializes ADC
-    timerInit();                        // Initializes TIMER_A
-    __bis_SR_register(LPM4_bits + GIE); // Enter LPM4, Enable interrupts
+    WDTCTL = WDTPW+WDTHOLD;                 // Stops Watchdog Timer
+    PM5CTL0 &= ~LOCKLPM5;                   // Disables high impedance mode
+    clkInit();                              // Initializes DCO
+    uartInit();                             // Initializes UART
+    adcInit();                              // Initializes ADC
+    timerInit();                            // Initializes TIMER_A
+
+    while(1){                               // Infinite loop for constant readings
+        formatAndSend(TX_Data);             // Formats it into bytes, and sends it.
+        __bis_SR_register(LPM0_bits + GIE); // Enter LPM0, Enable interrupts
+    }
 }
 
 
@@ -145,8 +150,8 @@ void main(void){
  *                      *
 \************************/
 
-#pragma vector = TIMER0_A0_VECTOR       // Timer_A interrupt
-__interrupt void Timer_A (void) {       // Timer_A interrupt vector function decleration
-    TX_Data = ADC12MEM0;                // Stores ADC memory
-    formatAndSend(TX_Data);             // Formats it into bytes, and sends it.
+#pragma vector = TIMER0_A0_VECTOR         // Timer_A interrupt
+__interrupt void Timer_A (void) {         // Timer_A interrupt vector function decleration
+    TX_Data = ADC12MEM0;                  // Stores ADC memory
+    __bic_SR_register_on_exit(LPM0_bits); // Exits LPM0
 }
