@@ -48,13 +48,17 @@ void adcInit(void){
  *                         *
 \***************************/
 
-void blinkInit(void) {
+void timerInit(void){
     TA0CCTL0 = CCIE;
     TA0CCR0 = 10000;
     TA0CTL   = TASSEL_2 + MC_1 + ID_3;  // SMCLK, Up-Mode, Predivider 8
     TA0EX0 = TAIDEX_7;
-}
+    TA1CCTL0 = CCIE;
+    TA1CTL = TASSEL_2 + MC_1;
+    TA1CCR0 = 32000;
 
+
+}
 
 void ledInit(void){
     P1DIR |=  BIT2;       // P1.2 to output
@@ -71,13 +75,17 @@ void ledInit(void){
 void main(void){
     WDTCTL = WDTPW+WDTHOLD;       // Stops Watchdog Timer
     adcInit();                    // Initializes ADC
-    blinkInit();                  // Initializes PWM
+    timerInit();                  // Initializes PWM
     ledInit();                    // Initializes LED
     __bis_SR_register(LPM0_bits + GIE);
 }
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A (void) {
-    TA0CCR0 = 10000-(ADC12MEM0*2);
     P1OUT ^= BIT2;     // Toggles the LED on Pin 1.0 via XOR
+}
+
+#pragma vector=TIMER0_A1_VECTOR
+__interrupt void Timer_A1 (void) {
+    TA0CCR0 = 10000 - (ADC12MEM0*2);
 }
