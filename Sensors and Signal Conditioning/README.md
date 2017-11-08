@@ -25,6 +25,7 @@ The first step of initializing the ADC is to determine which pin the reading wil
 P6SEL |= BIT0;
 ```
  For reference, the ADC pins used in this lab are as follows:
+ 
 |     Board    |   Pin   |
 |--------------|---------|
 | MSP430FR5994 | PIN 1.2 |
