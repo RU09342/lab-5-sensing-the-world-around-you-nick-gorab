@@ -31,9 +31,15 @@
  *                      *
 \************************/
 
-unsigned int TX_Data = 0;    // 16-bit integer
-         char MSB    = 0;    // 8-bit integer
-         char LSB    = 0;    // 8-bit integer
+#define LM35        0x00
+#define PhotoDiode  0x01
+#define Thermistor  0x02 
+
+
+unsigned int  TX_Data = 0;    // 16-bit integer
+         int  sensor  = 0;    // Determines sensor conversions
+         char MSB     = 0;    // 8-bit integer
+         char LSB     = 0;    // 8-bit integer
 
 
 
@@ -121,6 +127,15 @@ void timerInit(void) {
 \********************************/
 
 void formatAndSend(int value) {
+    switch(sensor){
+      case 0:             // LM35 Sensor
+        value = value/34;
+      break;
+      case 1:             // Photodiode
+      break;
+      case 2:             // Thermistor
+      break;
+    }
     MSB       = value >> 8;      // Bit Shifts 12 bits to the right by 8
     LSB       = value & 0xFF;    // ANDs the 12 bit value with 11111111, returning the LSB
     UCA0TXBUF = MSB;             // Transmits the MSB first

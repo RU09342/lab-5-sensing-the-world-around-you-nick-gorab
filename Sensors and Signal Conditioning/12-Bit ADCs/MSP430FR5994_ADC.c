@@ -31,13 +31,25 @@
  *                      *
 \************************/
 
-unsigned int TX_Data = 0;    // 16-bit integer
-         char MSB    = 0;    // 8-bit integer
-         char LSB    = 0;    // 8-bit integer
+#define LM35        0x00
+#define PhotoDiode  0x01
+#define Thermistor  0x02 
+
+
+unsigned int  TX_Data = 0;    // 16-bit integer
+         int  sensor  = 0;    // Determines sensor conversions
+         char MSB     = 0;    // 8-bit integer
+         char LSB     = 0;    // 8-bit integer
 
 
 
-void clkInit(void){
+/************************\
+ *                      *
+ *  DCO Initialization  *
+ *                      *
+\************************/
+
+void dcoInit(void){
   CSCTL0_H = CSKEY_H;       // Unlocks clock registers for writing
   CSCTL1   = DCOFSEL_3      // Sets DCO at 8MHz
            | DCORSEL;       // Sets DCO at 8MHz
@@ -113,6 +125,15 @@ void timerInit(void){
 \********************************/
 
 void formatAndSend(int value){
+    switch(sensor){
+      case 0:             // LM35 Sensor
+        value = value/34;
+      break;
+      case 1:             // Photodiode
+      break;
+      case 2:             // Thermistor
+      break;
+    }
     MSB       = value >> 8;      // Bit Shifts 12 bits to the right by 8
     LSB       = value & 0xFF;    // ANDs the 12 bit value with 11111111, returning the LSB
     UCA0TXBUF = MSB;             // Transmits the MSB first
@@ -131,7 +152,7 @@ void formatAndSend(int value){
 void main(void){
     WDTCTL = WDTPW+WDTHOLD;                 // Stops Watchdog Timer
     PM5CTL0 &= ~LOCKLPM5;                   // Disables high-impedance mode
-    clkInit();                              // Initializes DCO
+    dcoInit();                              // Initializes DCO
     uartInit();                             // Initializes UART
     adcInit();                              // Initializes ADC
     timerInit();                            // Initializes TIMER_A
