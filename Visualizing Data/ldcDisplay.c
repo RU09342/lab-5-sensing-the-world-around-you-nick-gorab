@@ -1,8 +1,8 @@
 /*
- *       MSP430F5529_ADC.c
+ *       lcdDisplay.c
  *
- *   Created on:  November 7, 2017
- *  Last Edited:  November 7, 2017
+ *   Created on:  November 10, 2017
+ *  Last Edited:  November 10, 2017
  *       Author:  Nick Gorab
  *        Board:  6989
  */
@@ -22,6 +22,7 @@
 
 
 #include <msp430.h>
+#include "LCDDriver.h"
 
 
 
@@ -31,17 +32,18 @@
  *                      *
 \************************/
 
-unsigned int TX_Data = 0;    // 16-bit integer
-         char MSB    = 0;    // 8-bit integer
-         char LSB    = 0;    // 8-bit integer
+int Ones = 0;
+int Tens = 0;
+int Hundreds = 0;
+int ADC_Data = 0;
 
 
 
-/***********************\
+/************************\
  *                      *
  *  DCO Initialization  *
  *                      *
-\***********************/
+\************************/
 
 void clkInit(void){
   CSCTL0_H = CSKEY_H;       // Unlocks clock registers for writing
@@ -53,27 +55,8 @@ void clkInit(void){
   CSCTL3   = DIVA__1        // ACLK source divider of 2
            | DIVS__1        // SMCLK source divider of 2
            | DIVM__1;       // MCLK source divider of 2
-  CSCTL0_H = 0;             // Locks clock registers 
+  CSCTL0_H = 0;             // Locks clock registers
 }
-
-/*************************\
- *                       *
- *  UART Initialization  *
- *                       *
-\*************************/
-
-void uartInit(void) {
-    P2SEL0 |= BIT0;         // UART TX
-    UCA0CTLW0 |= UCSWRST;   // State machine reset
-    UCA0CTLW0 |= UCSSEL1;   // Uses SMCLK as source
-    UCA0BR0    = 52;        // Modulation
-    UCA0MCTLW  = UCBRF_1    // Modulation
-              | UCOS16      // Modulation
-              | 0x4900;     // Modulation
-    UCA0BR1    = 0x00;      // Modulation
-    UCA0CTLW0 &= ~UCSWRST;  // Starts state machine
-}
-
 
 
 
@@ -112,20 +95,21 @@ void timerInit(void){
 
 
 
-/********************************\
- *                              *
- *  Data Conditioning Function  *
- *                              *
-\********************************/
+/***********************************\
+ *                                 *
+ *  Display Conditioning Function  *
+ *                                 *
+\***********************************/
 
-void formatAndSend(int value){
-    MSB       = value >> 8;      // Bit Shifts 12 bits to the right by 8
-    LSB       = value & 0xFF;    // ANDs the 12 bit value with 11111111, returning the LSB
-    UCA0TXBUF = MSB;             // Transmits the MSB first
-    while(!(UCA0IFG & UCTXIFG)); // Waits for the TX buffer to be cleared
-    UCA0TXBUF = LSB;             // Transmits the LSB second
+void formatAndDisplay(int rawSauce){
+    rawSauce = rawSauce/34;            // Normalizes temp data (OPAmp Gain of 2.5)
+    Ones     = (rawSauce % 10);        // Determines ones place
+    Tens     = ((rawSauce/10) % 10);   // Determines tens place
+    Hundreds = ((rawSauce/100) % 10);  // Determines hundreds place
+    showChar(Ones, 0);                 // Displays ones digit
+    showChar(Tens, 1);                 // Displats tens digit
+    showChar(Hundreds, 2);             // Displats hundreds digit
 }
-
 
 
 /***********************\
@@ -138,12 +122,11 @@ void main(void){
     WDTCTL = WDTPW+WDTHOLD;                 // Stops Watchdog Timer
     PM5CTL0 &= ~LOCKLPM5;                   // Disables high impedance mode
     clkInit();                              // Initializes DCO
-    uartInit();                             // Initializes UART
     adcInit();                              // Initializes ADC
     timerInit();                            // Initializes TIMER_A
 
-    while(1){                               // Infinite loop for constant readings
-        formatAndSend(TX_Data);             // Formats it into bytes, and sends it.
+    while(1){                               // Infinite loop for constant updating
+        formatAndDisplay(ADC_Data);         // Formats the temp data and displays it.
         __bis_SR_register(LPM0_bits + GIE); // Enter LPM0, Enable interrupts
     }
 }
@@ -158,6 +141,6 @@ void main(void){
 
 #pragma vector = TIMER0_A0_VECTOR         // Timer_A interrupt
 __interrupt void Timer_A (void) {         // Timer_A interrupt vector function decleration
-    TX_Data = ADC12MEM0;                  // Stores ADC memory
+    ADC_Data = ADC12MEM0;                 // Stores ADC memory
     __bic_SR_register_on_exit(LPM0_bits); // Exits LPM0
 }
