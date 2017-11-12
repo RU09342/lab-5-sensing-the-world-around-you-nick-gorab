@@ -41,6 +41,25 @@ int ADC_Data = 0;
 
 /************************\
  *                      *
+ *  LCD Initialization  *
+ *                      *
+\************************/
+
+void lcdInit(void){
+  PJSEL0      = BIT4 | BIT5;                               // Sets pins for LCD Display
+  LCDCPCTL0   = 0xFFFF;                                    // Initializes the LCD Segments
+  LCDCPCTL1   = 0xFC3F;                                    // Initializes the LCD Segments
+  LCDCPCTL2   = 0x0FFF;                                    // Initializes the LCD Segments
+  LCDCCTL0    = LCDDIV__1 | LCDPRE__16 | LCD4MUX | LCDLP;
+  LCDCVCTL    = VLCD_1 | VLCDREF_0 | LCDCPEN;
+  LCDCCPCTL   = LCDCPCLKSYNC;                              // Clock synchronization enabled
+  LCDCMEMCTL  = LCDCLRM;                                   // Clear LCD memory
+  LCDCCTL0   |= LCDON;
+}
+
+
+/************************\
+ *                      *
  *  DCO Initialization  *
  *                      *
 \************************/
