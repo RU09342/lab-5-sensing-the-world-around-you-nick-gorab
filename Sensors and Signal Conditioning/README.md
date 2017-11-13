@@ -14,17 +14,17 @@ There are three types of circuits which needed to be created in order to use the
 
 For the voltage based sensor, an LM35 temperature sensor was used. Because it outputs 10mV/°C, a non-inverting Op-Amp was used to amplify the sensor's output by 2.5, extending the sensor to the full range of the ADC.
 
-![TempSensor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/Sensors%20and%20Signal%20Conditioning/Schematics/Temperature%20Sensor%20Schematic.png)
+![TempSensor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/blob/master/Sensors%20and%20Signal%20Conditioning/Schematics/Temperature%20Sensor%20Schematic.PNG)
 
 ### Current
 For the current based sensor, a phototransistor was used and acts as a normally closed switch. When it is exposed to light, the transistor is open and all of the signal goes through the 100k Resistor. But when the transistor detects no light, it closes and only has a resistance of about 15k so the majority of the signal runs to ground. The code is edited so that if the ADC is not reading a certain value, then the desired function will not initiate.
 
-![PhotoTransistor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/Sensors%20and%20Signal%20Conditioning/Schematics/PhotoTransistor%20Schematic.png)
+![PhotoTransistor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/blob/master/Sensors%20and%20Signal%20Conditioning/Schematics/PhotoTransistor%20Schematic.PNG)
 
 ### Resistance
 For the resistance based sensor, a thermistor was used in a voltage divider with a 10k resistor. This value is significant because at room temperature (25°C) the thermistor reads about 10k ohms. This gives the thermistor circuit max sensitvity and outputs the maximum range, ideal for ADC applications.
 
-![Thermistor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/Sensors%20and%20Signal%20Conditioning/Schematics/Thermistor%20Schematic.png)
+![Thermistor](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/blob/master/Sensors%20and%20Signal%20Conditioning/Schematics/Thermistor%20Schematic.PNG)
 
 ## Software
 ### ADC
