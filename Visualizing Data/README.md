@@ -38,12 +38,15 @@ This function will take in the varibale to be displayed, and then its respective
 
 Besides this function, the rest of the code is pretty much identical to the previous sections.
 
-### PC Visualization 
+## PC Visualization 
 For this section, the value recorded from the ADC is to be displayed and graphed by a computer. In order to complete this section, Code Composer Studio's Graph function was used. It was set to scan for the `TX_Data` variable. This value is then plotted. 
 
-For this section a distance sensor was used in order to show a relativly fast change in ADC value. The figure below shows the change in ADC value over time as I moved my hand closer and further from the distance sensor. 
+For this section a distance sensor was used and the output signal was sent to a computer over UART to be displayed in Code Composer. The resulting graph can be found below in the following figure and the change in signal as I moved my hand closer and further from the sensor can be clearly seen. 
 
-[SHOW GRAPH]
+![CCSVisual](https://github.com/RU09342/lab-5-sensing-the-world-around-you-nick-gorab/blob/master/Visualizing%20Data/CCSGraph.PNG)
 
 The code which was used in this section is identical to the code used for the Sensors and Signal Conditioning section. 
 
+## LED Visualization
+
+Another form of data visualization is through the use of an RGB LED. For this lab in particular, the color of the led will change based on the temperature read by the ADC. This is done by altering the PWM signal which is sent to each of the LEDs, controlling the overall color of the light. 

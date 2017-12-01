@@ -1,5 +1,5 @@
 /*
- *       proxBeeper.c
+ *       lightChange.c
  *
  *   Created on:  November 7, 2017
  *  Last Edited:  November 7, 2017
